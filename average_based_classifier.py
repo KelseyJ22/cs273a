@@ -201,8 +201,8 @@ def display(classifications, test_data):
 # high-level function to parse the provided data, train, and then test
 def predict_enhancements():
 	data = read()
-	training_data = dict(data.items()[len(data)/2:])
-	testing_data = dict(data.items()[:len(data)/2])
+	training_data = dict(data.items()[len(data)/3:])
+	testing_data = dict(data.items()[:len(data)/3])
 	probabilities = train(training_data)
 	classifications = test(probabilities, testing_data)
 	display(classifications, testing_data)
