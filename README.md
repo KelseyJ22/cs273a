@@ -1,1 +1,3 @@
-# cs273a
+average_based_classifier.py computes the average score for each of the labels in the data from the Vista Enhancer Browser and returns that value as the prediction. It reports 0 or 1 for positive (an enhancer) or negative (not an enhancer) purely based on whether there were more shared k-mers of length 4, 5, 6, 7, or 8 in positive- or negative-labeled sequences in the training data.
+
+The binaries wigToBigWig and bigWigAverageOverBed are downloaded from the UCSC Genome Browser and used as "wigToBigWig input.wig chrom.sizes myBigWig.bw" (with input.wig as zipped or unzipped wig file and chrom.sizes computed by the fetchChromSizes utility) and __________, respectively. TODO figure out fetchChromSizes and bigWigAverageOverBed
