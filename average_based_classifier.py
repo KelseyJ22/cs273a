@@ -163,6 +163,10 @@ def test(encountered, test_data):
 		# will be a list of all labels encountered by sequences stored in the map constructed with training data
 		labels = list()
 		for i in range(0, len(sequence)):
+			if i+3 < len(sequence):
+				seq = sequence[i:i+3]
+				if seq in encountered:
+					labels.append(encountered[seq])
 			if i+4 < len(sequence):
 				seq = sequence[i:i+4]
 				if seq in encountered:
@@ -181,6 +185,14 @@ def test(encountered, test_data):
 					labels.append(encountered[seq])
 			elif i+8 < len(sequence):
 				seq = sequence[i:i+8]
+				if seq in encountered:
+					labels.append(encountered[seq])
+			elif i+9 < len(sequence):
+				seq = sequence[i:i+9]
+				if seq in encountered:
+					labels.append(encountered[seq])
+			elif i+10 < len(sequence):
+				seq = sequence[i:i+10]
 				if seq in encountered:
 					labels.append(encountered[seq])
 
