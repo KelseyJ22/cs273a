@@ -40,11 +40,6 @@ def process_veb_bed():
 	return res
 
 
-def display(dictionary):
-	for entry in dictionary:
-		print str(entry) + ' ' + str(dictionary[entry])
-
-
 def parse():
 	global filenames
 	veb_bed_map = process_veb_bed()
@@ -64,7 +59,7 @@ def parse():
 						avg_to_seq[avg] = seq # add to the final map
 			line = f.readline()
 		f.close()
-	display(avg_to_seq)
+	return avg_to_seq
 
 
 parse()
