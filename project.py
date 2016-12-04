@@ -1,9 +1,11 @@
 import sys
 import re
 from itertools import *
-
+import pandas as pd
+import numpy as np
 
 # start w 6mers
+# uppercase everything
 # feature vectors are counts of kmer appearance in sequence
 # then have variable for enhancer or not, then labels
 # fold in reverse complements
@@ -15,57 +17,108 @@ from itertools import *
 # make map of permutations to index, use that to build feature vectors for each sequence (remove complements here)
 # then try different classifiers
 
+def reverse_complement(sequence):
+    rc = ''
+    for base in sequence:
+        if base == 'A':
+            rc = 'T' + rc
+        elif base == 'T':
+            rc = 'A' + rc
+        elif base == 'C':
+            rc = 'G' + rc
+        else:
+            rc = 'C' + rc
+    return rc
 
 def build_map_of_indices(k):
-    #BUILDING THE MAP
     list_of_permutations = [''.join(permutation) for permutation in product('ATCG', repeat=k)]
-    print list_of_permutations
-    return 'hi'
+    map_of_indices = {}
+    index = 0
+    num_permutations = 0
+    for permutation in list_of_permutations:
+        if reverse_complement(permutation) not in map_of_indices:
+            num_permutations += 1
+            map_of_indices[permutation] = index
+            index += 1
+    return map_of_indices
 
+def window_to_string(window):
+    to_return = ''
+    for base in window:
+        to_return += base
+    return to_return
 
 def main():
-
-    labels = {}
-
-    total_samples = 0
-
-    k = 4
+    k = 6
 
     map_of_indices = build_map_of_indices(k)
 
-    # THIS STARTS PARSING
-    # f = open('vistaEnhancerBrowser.txt')
-    # line = f.readline()
-    # while(line):
-    #     if '>' in line:
-    #         # labels are [enhancer, brain, forebrain, midbrain, hindbrain, limb, neural tube, heart]
-    #         labels = [0, 0, 0, 0, 0, 0, 0, 0]
-    #         if 'positive' in line:
-    #             labels[0] = 1
-    #             pieces = line.strip().split('|')
-    #             for x in xrange(4, len(pieces)):
-    #                 label = re.sub('\[.*\]', '', re.sub('\(.*\)', '', pieces[x])).strip()
-    #                 if label == 'forebrain':
-    #                     labels[2] = 1
-    #                     labels[1] = 1
-    #                 elif label == 'midbrain':
-    #                     labels[3] = 1
-    #                     labels[1] = 1
-    #                 elif label == 'hindbrain':
-    #                     labels[4] = 1
-    #                     labels[1] = 1
-    #                 elif label == 'limb':
-    #                     labels[5] = 1
-    #                 elif label == 'neural tube':
-    #                     labels[6] = 1
-    #                 elif label == 'heart':
-    #                     labels[7] = 1
-    #         else:
-                #do things
-    # for key, value in sorted(labels.iteritems(), key=lambda (k,v): (v,k)):
-    #     print "%s: %s" % (key, value)
-    # print total_samples
-    # f.close()
+    # counts number of sequences so DataFrame can be preallocated, since
+    # adding rows to DF one by one is very expensive
+    f = open('vistaEnhancerBrowser.txt')
+    num_seqs = 0
+    for line in f.readlines():
+        if len(line) > 0 and line[0] == '>':
+            num_seqs += 1
+    f.close()
+
+    data = pd.DataFrame(index=np.arange(0, num_seqs), columns=[x for x in xrange(len(map_of_indices) + 8)])
+
+    f = open('vistaEnhancerBrowser.txt')
+    line = f.readline()
+    labels = []
+    window = []
+    features = [0 for x in xrange(len(map_of_indices))]
+    feature = 0
+    while(line):
+        if '>' in line:
+            if len(window) != 0:
+                # STILL NEED TO NORMALIZE
+                full_vector = features + labels
+                data.loc[feature] = full_vector
+                features = [0 for x in xrange(len(map_of_indices))]
+                feature += 1
+                window = []
+            # labels are [enhancer, brain, forebrain, midbrain, hindbrain, limb, neural tube, heart]
+            labels = [0, 0, 0, 0, 0, 0, 0, 0]
+            if 'positive' in line:
+                labels[0] = 1
+                pieces = line.strip().split('|')
+                for x in xrange(4, len(pieces)):
+                    label = re.sub('\[.*\]', '', re.sub('\(.*\)', '', pieces[x])).strip()
+                    if label == 'forebrain':
+                        labels[2] = 1
+                        labels[1] = 1
+                    elif label == 'midbrain':
+                        labels[3] = 1
+                        labels[1] = 1
+                    elif label == 'hindbrain':
+                        labels[4] = 1
+                        labels[1] = 1
+                    elif label == 'limb':
+                        labels[5] = 1
+                    elif label == 'neural tube':
+                        labels[6] = 1
+                    elif label == 'heart':
+                        labels[7] = 1
+        else:
+            for base in line.strip():
+                if len(window) < k:
+                    window.append(base.upper())
+                else:
+                    window = window[1:] + [base.upper()]
+                if (len(window) == k):
+                    if (window_to_string(window)) in map_of_indices:
+                        features[map_of_indices[window_to_string(window)]] += 1
+                    else:
+                        features[map_of_indices[reverse_complement(window_to_string(window))]] += 1
+        line = f.readline()
+    # STILL NEED TO NORMALIZE
+    full_vector = features + labels
+    data.loc[feature] = full_vector
+
+    f.close()
+    print data
 
 if __name__ == "__main__":
     main()
