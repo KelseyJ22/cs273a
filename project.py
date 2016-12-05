@@ -4,6 +4,7 @@ from itertools import *
 import pandas as pd
 import numpy as np
 
+# Removed element 1517 because it contained 'n' as a base
 # start w 6mers
 # uppercase everything
 # feature vectors are counts of kmer appearance in sequence
@@ -49,12 +50,15 @@ def window_to_string(window):
     return to_return
 
 def main():
+    print 'Parsing...'
     k = 6
 
+    print 'Building map of indices...'
     map_of_indices = build_map_of_indices(k)
 
     # counts number of sequences so DataFrame can be preallocated, since
     # adding rows to DF one by one is very expensive
+    print 'Preallocating DataFrame...'
     f = open('vistaEnhancerBrowser.txt')
     num_seqs = 0
     for line in f.readlines():
@@ -69,16 +73,18 @@ def main():
     labels = []
     window = []
     features = [0 for x in xrange(len(map_of_indices))]
-    feature = 0
+    sequence = 0
+    print 'Computing features...'
     while(line):
         if '>' in line:
-            if len(window) != 0:
-                # STILL NEED TO NORMALIZE
+            if labels != []:
+                # normalizes frequencies
+                divisor = float(sum(features))
+                features = [feature / divisor for feature in features]
                 full_vector = features + labels
-                data.loc[feature] = full_vector
+                data.loc[sequence] = full_vector
                 features = [0 for x in xrange(len(map_of_indices))]
-                feature += 1
-                window = []
+                sequence += 1
             # labels are [enhancer, brain, forebrain, midbrain, hindbrain, limb, neural tube, heart]
             labels = [0, 0, 0, 0, 0, 0, 0, 0]
             if 'positive' in line:
@@ -108,17 +114,22 @@ def main():
                 else:
                     window = window[1:] + [base.upper()]
                 if (len(window) == k):
+                    window_string = window_to_string(window)
                     if (window_to_string(window)) in map_of_indices:
-                        features[map_of_indices[window_to_string(window)]] += 1
+                        features[map_of_indices[window_string]] += 1
                     else:
-                        features[map_of_indices[reverse_complement(window_to_string(window))]] += 1
+                        features[map_of_indices[reverse_complement(window_string)]] += 1
         line = f.readline()
-    # STILL NEED TO NORMALIZE
+    # normalizes frequencies
+    divisor = float(sum(features))
+    features = [feature / divisor for feature in features]
     full_vector = features + labels
-    data.loc[feature] = full_vector
+    data.loc[sequence] = full_vector
 
     f.close()
-    print data
+    print 'Done parsing! Data ready to use.'
+    data.to_pickle('pickled_vista_data_k_' + str(k) + '.pkl')
+    # To load the data, do 'data = pd.read_pickle(filename)'
 
 if __name__ == "__main__":
     main()
