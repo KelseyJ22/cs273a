@@ -1,6 +1,8 @@
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import classification_report
+from sklearn import metrics
+
 
 LABEL_SIZE = 8
 
@@ -13,10 +15,12 @@ def classify(data):
 	classifier.fit(features, enhancer_labels.tolist())
 	predictions = classifier.predict(features)
 	print classification_report(enhancer_labels.tolist(), predictions)
+	fpr, tpr, thresholds = metrics.roc_curve(enhancer_labels.tolist(), predictions)
+	print metrics.auc(fpr, tpr)
 
 
 def read_pickle():
-	k = 3
+	k = 6
 	filename = "pickled_vista_data_k_{0}.pkl".format(k)
 	data = pd.read_pickle(filename)
 	return data
