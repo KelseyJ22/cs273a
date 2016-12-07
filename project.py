@@ -3,6 +3,7 @@ import re
 from itertools import *
 import pandas as pd
 import numpy as np
+import math
 
 # Removed element 1517 because it contained 'n' as a base
 # start w 6mers
@@ -54,8 +55,17 @@ def get_averages(lines):
     results = list()
     for line in lines:
         pieces = line.split('\t')
-        avg = pieces[4]
-        results.append(avg)
+        if len(pieces) >= 4:
+            avg = float(pieces[4].rstrip())
+            if not math.isnan(avg):
+                if avg != float('Inf'):
+                    results.append(avg)
+                else:
+                    results.append(0.0)
+            else:
+                results.append(0.0)
+        else:
+            results.append(0.0)
     return results
 
 
@@ -76,14 +86,13 @@ def main():
             num_seqs += 1
     f.close()
 
-    data = pd.DataFrame(index=np.arange(0, num_seqs), columns=[x for x in xrange(len(map_of_indices) + 8)])
-
+    data = pd.DataFrame(index=np.arange(0, num_seqs), columns=[x for x in xrange(len(map_of_indices) + 13)])
     f = open('vistaEnhancerBrowser.txt')
-    t1 = open('H3K27me3.tab')
-    t2 = open('H3K36me3.tab')
-    t3 = open('H3K4me3.tab')
-    t4 = open('H3K4me1.tab')
-    t5 = open('H3K9ac.tab')
+    t1 = open('H3K27me3.tab', 'r')
+    t2 = open('H3K36me3.tab', 'r')
+    t3 = open('H3K4me3.tab', 'r')
+    t4 = open('H3K4me1.tab', 'r')
+    t5 = open('H3K9ac.tab', 'r')
 
     l1 = t1.readline()
     l2 = t2.readline()
@@ -102,14 +111,21 @@ def main():
                 # normalizes frequencies
                 divisor = float(sum(features))
                 features = [feature / divisor for feature in features]
-                averages = get_averages([l1, l2, l3, l4, l5])
 
-                full_vector = features + averages + labels
-                print full_vector
+                averages = get_averages([l1, l2, l3, l4, l5])
                 
+                full_vector = features + averages + labels
+
                 data.loc[sequence] = full_vector
                 features = [0 for x in xrange(len(map_of_indices))]
                 sequence += 1
+                window = []
+                l1 = t1.readline()
+                l2 = t2.readline()
+                l3 = t3.readline()
+                l4 = t4.readline()
+                l5 = t5.readline()
+
             # labels are [enhancer, brain, forebrain, midbrain, hindbrain, limb, neural tube, heart]
             labels = [0, 0, 0, 0, 0, 0, 0, 0]
             if 'positive' in line:
@@ -145,11 +161,7 @@ def main():
                     else:
                         features[map_of_indices[reverse_complement(window_string)]] += 1
         line = f.readline()
-        l1 = t1.readline()
-        l2 = t2.readline()
-        l3 = t3.readline()
-        l4 = t4.readline()
-        l5 = t5.readline()
+
     # normalizes frequencies
     divisor = float(sum(features))
     features = [feature / divisor for feature in features]

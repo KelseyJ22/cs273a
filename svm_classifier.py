@@ -17,7 +17,7 @@ def classify_enhancer(df):
 	m = SVC(C=1000.0)
 	cross_val = False
 	if not cross_val:
-		m.fit(features, enhancer_labels.tolist())
+		m.fit(features.values, enhancer_labels.tolist())
 		predictions = m.predict(features)
 		print classification_report(enhancer_labels.tolist(), predictions)
 		fpr, tpr, thresholds = metrics.roc_curve(enhancer_labels.tolist(), predictions)
@@ -28,7 +28,7 @@ def classify_enhancer(df):
 		print "Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)
 
 def read_pickle():
-	k = 6
+	k = 3
 	filename = "pickled_vista_data_k_{0}.pkl".format(k)
 	data = pd.read_pickle(filename)
 	return data
