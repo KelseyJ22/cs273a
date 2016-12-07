@@ -22,7 +22,7 @@ def classify_enhancer(df):
 	print classification_report(enhancer_labels.tolist(), predictions)
 
 def read_pickle():
-	k = 3
+	k = 6
 	filename = "pickled_vista_data_k_{0}.pkl".format(k)
 	data = pd.read_pickle(filename)
 	return data

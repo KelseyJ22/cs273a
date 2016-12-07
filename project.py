@@ -49,6 +49,16 @@ def window_to_string(window):
         to_return += base
     return to_return
 
+
+def get_averages(lines):
+    results = list()
+    for line in lines:
+        pieces = line.split('\t')
+        avg = pieces[4]
+        results.append(avg)
+    return results
+
+
 def main():
     print 'Parsing...'
     k = 6
@@ -69,6 +79,17 @@ def main():
     data = pd.DataFrame(index=np.arange(0, num_seqs), columns=[x for x in xrange(len(map_of_indices) + 8)])
 
     f = open('vistaEnhancerBrowser.txt')
+    t1 = open('H3K27me3.tab')
+    t2 = open('H3K36me3.tab')
+    t3 = open('H3K4me3.tab')
+    t4 = open('H3K4me1.tab')
+    t5 = open('H3K9ac.tab')
+
+    l1 = t1.readline()
+    l2 = t2.readline()
+    l3 = t3.readline()
+    l4 = t4.readline()
+    l5 = t5.readline()
     line = f.readline()
     labels = []
     window = []
@@ -81,7 +102,11 @@ def main():
                 # normalizes frequencies
                 divisor = float(sum(features))
                 features = [feature / divisor for feature in features]
-                full_vector = features + labels
+                averages = get_averages([l1, l2, l3, l4, l5])
+
+                full_vector = features + averages + labels
+                print full_vector
+                
                 data.loc[sequence] = full_vector
                 features = [0 for x in xrange(len(map_of_indices))]
                 sequence += 1
@@ -120,10 +145,16 @@ def main():
                     else:
                         features[map_of_indices[reverse_complement(window_string)]] += 1
         line = f.readline()
+        l1 = t1.readline()
+        l2 = t2.readline()
+        l3 = t3.readline()
+        l4 = t4.readline()
+        l5 = t5.readline()
     # normalizes frequencies
     divisor = float(sum(features))
     features = [feature / divisor for feature in features]
-    full_vector = features + labels
+    averages = get_averages([l1, l2, l3, l4, l5])
+    full_vector = features + averages + labels
     data.loc[sequence] = full_vector
 
     f.close()

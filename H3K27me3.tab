@@ -1,3 +1,4 @@
+# name size covered sum mean(covered) mean(all)
 0	639	639	220	0.344288	0.344288
 1	1641	736	220	0.134065	0.298913
 2	1309	0	0	0	0
