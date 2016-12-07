@@ -18,10 +18,9 @@ def classify(data):
 	fpr, tpr, thresholds = metrics.roc_curve(enhancer_labels.tolist(), predictions)
 	print metrics.auc(fpr, tpr)
 
-
 def read_pickle():
 	k = 6
-	filename = "pickled_vista_data_k_{0}.pkl".format(k)
+	filename = "noepi_pickled_vista_data_k_{0}.pkl".format(k)
 	data = pd.read_pickle(filename)
 	return data
 
