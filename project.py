@@ -5,20 +5,6 @@ import pandas as pd
 import numpy as np
 import math
 
-# Removed element 1517 because it contained 'n' as a base
-# start w 6mers
-# uppercase everything
-# feature vectors are counts of kmer appearance in sequence
-# then have variable for enhancer or not, then labels
-# fold in reverse complements
-# normalize
-# group mouse and human
-# ignore #s after labels
-# remember class weight (try without too)
-# use forebrain, midbrain, hindbrain, limb, neural tube, heart (count 243) | branchial arch (count 155)
-# make map of permutations to index, use that to build feature vectors for each sequence (remove complements here)
-# then try different classifiers
-
 def reverse_complement(sequence):
     rc = ''
     for base in sequence:
@@ -50,7 +36,6 @@ def window_to_string(window):
         to_return += base
     return to_return
 
-
 def get_averages(lines):
     results = list()
     for line in lines:
@@ -70,6 +55,8 @@ def get_averages(lines):
 
 
 def main():
+    filename = 'vistaEnhancerBrowser.txt'
+
     print 'Parsing...'
     k = 6
 
@@ -79,7 +66,7 @@ def main():
     # counts number of sequences so DataFrame can be preallocated, since
     # adding rows to DF one by one is very expensive
     print 'Preallocating DataFrame...'
-    f = open('vistaEnhancerBrowser.txt')
+    f = open(filename)
     num_seqs = 0
     for line in f.readlines():
         if len(line) > 0 and line[0] == '>':
@@ -171,7 +158,7 @@ def main():
 
     f.close()
     print 'Done parsing! Data ready to use.'
-    data.to_pickle('pickled_vista_data_k_' + str(k) + '.pkl')
+    data.reindex(np.random.permutation(data.index)).to_pickle('pickled_vista_data_k_' + str(k) + '.pkl')
     # To load the data, do 'data = pd.read_pickle(filename)'
 
 if __name__ == "__main__":

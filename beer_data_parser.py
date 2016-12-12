@@ -4,20 +4,6 @@ from itertools import *
 import pandas as pd
 import numpy as np
 
-# Removed element 1517 because it contained 'n' as a base
-# start w 6mers
-# uppercase everything
-# feature vectors are counts of kmer appearance in sequence
-# then have variable for enhancer or not, then labels
-# fold in reverse complements
-# normalize
-# group mouse and human
-# ignore #s after labels
-# remember class weight (try without too)
-# use forebrain, midbrain, hindbrain, limb, neural tube, heart (count 243) | branchial arch (count 155)
-# make map of permutations to index, use that to build feature vectors for each sequence (remove complements here)
-# then try different classifiers
-
 def reverse_complement(sequence):
     rc = ''
     for base in sequence:
@@ -50,14 +36,12 @@ def window_to_string(window):
     return to_return
 
 def main():
-    pos_file_1 = 'sequence_files/enh_fb.fa'
-    pos_file_2 = ''
-    pse_file_3 = ''
-    neg_file = 'sequence_files/random4000.fa'
-    out_file = 'enh_fb_random4000_k_3.pkl'
+    pos_file = 'sequence_files/enh_fb.fa'
+    neg_file = 'sequence_files/random2453.fa'
+    out_file = 'enh_fb_random2453_k_6.pkl'
 
     print 'Parsing...'
-    k = 3
+    k = 6
 
     print 'Building map of indices...'
     map_of_indices = build_map_of_indices(k)
@@ -65,7 +49,7 @@ def main():
     # counts number of sequences so DataFrame can be preallocated, since
     # adding rows to DF one by one is very expensive
     print 'Preallocating DataFrame...'
-    f = open(pos_file_1)
+    f = open(pos_file)
     num_seqs = 0
     for line in f.readlines():
         if len(line) > 0 and line[0] == '>':
@@ -79,7 +63,7 @@ def main():
 
     data = pd.DataFrame(index=np.arange(0, num_seqs), columns=[x for x in xrange(len(map_of_indices) + 1)])
 
-    f = open(pos_file_1)
+    f = open(pos_file)
     line = f.readline()
     labels = []
     window = []
